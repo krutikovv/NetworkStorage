@@ -11,5 +11,9 @@
         <module name="command" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="cloud-client" target="8" />
+      <module name="cloud-server" target="8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

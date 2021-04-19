@@ -21,9 +21,16 @@
     </HBox>
 
     <HBox VBox.vgrow="ALWAYS">
-        <ListView fx:id="clientList" visible="false" managed="false" minWidth="100"
+        <ListView fx:id="clientList" visible="false" managed="false" minWidth="600"
         onMouseReleased="#clientListClicked"/>
-        <TextArea fx:id="textArea" HBox.hgrow="ALWAYS" editable="false"/>
+        <ListView fx:id="serverList" visible="true" managed="false" minWidth="600"
+        onMouseReleased="#serverListClicked"/>
+<!--        <TextArea fx:id="textArea" HBox.hgrow="ALWAYS" editable="false"/>-->
+    </HBox>
+
+    <HBox fx:id="controlPanel" visible="false">
+        <Button text="copy" onAction="#copyFileDir" minWidth="100"/>
+        <Button text="create" onAction="#createDir" minWidth="100"/>
     </HBox>
 
     <HBox fx:id="msgPanel" visible="false" managed="false">

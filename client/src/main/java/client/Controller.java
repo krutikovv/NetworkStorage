@@ -7,6 +7,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
@@ -22,9 +23,14 @@ import javafx.stage.WindowEvent;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -39,9 +45,13 @@ public class Controller implements Initializable {
     @FXML
     private ListView<String> clientList;
     @FXML
+    private ListView<String> serverList;
+    @FXML
     private TextArea textArea;
     @FXML
     private TextField textField;
+    @FXML
+    private HBox controlPanel;
 
     private Socket socket;
     private DataInputStream in;
@@ -62,19 +72,23 @@ public class Controller implements Initializable {
         msgPanel.setManaged(authenticated);
         clientList.setVisible(authenticated);
         clientList.setManaged(authenticated);
+        serverList.setVisible(authenticated);
+        serverList.setManaged(authenticated);
         authPanel.setVisible(!authenticated);
         authPanel.setManaged(!authenticated);
+        controlPanel.setVisible(authenticated);
+        controlPanel.setManaged(authenticated);
         if (!authenticated) {
             nickname = "";
         }
         setTitle(nickname);
-        textArea.clear();
+//        textArea.clear();
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Platform.runLater(() -> {
-            stage = (Stage) textArea.getScene().getWindow();
+//            stage = (Stage) textArea.getScene().getWindow();
             stage.setOnCloseRequest(event -> {
                 System.out.println("bye");
                 if (socket != null && !socket.isClosed()) {
@@ -86,7 +100,6 @@ public class Controller implements Initializable {
                 }
             });
         });
-
         setAuthenticated(false);
     }
 
@@ -122,7 +135,7 @@ public class Controller implements Initializable {
                                 regController.regNo();
                             }
                         } else {
-                            textArea.appendText(str + "\n");
+//                            textArea.appendText(str + "\n");
                         }
                     }
 
@@ -139,14 +152,16 @@ public class Controller implements Initializable {
                                 String[] tokens = str.split("\\s");
                                 Platform.runLater(() -> {
                                     clientList.getItems().clear();
+                                    serverList.getItems().clear();
                                     for (int i = 1; i < tokens.length; i++) {
                                         clientList.getItems().add(tokens[i]);
+                                        serverList.getItems().add(tokens[i]);
                                     }
                                 });
                             }
 
                         } else {
-                            textArea.appendText(str + "\n");
+//                            textArea.appendText(str + "\n");
                         }
                     }
                 } catch (RuntimeException e) {
@@ -170,13 +185,23 @@ public class Controller implements Initializable {
 
     @FXML
     public void sendMsg(ActionEvent actionEvent) {
-        try {
-            out.writeUTF(textField.getText());
-            textField.clear();
-            textField.requestFocus();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        Path path = Paths.get("C:\\");
+        File dir = new File(String.valueOf(path)); //path указывает на директорию
+        List<File> lst = new ArrayList<>();
+        for ( File file : dir.listFiles() ){
+            if ( file.isFile() || file.isDirectory()) {
+                lst.add(file);
+                clientList.getItems().add(file.toString());
+            }
         }
+
+        System.out.println(lst);
+
+
+//            out.writeUTF(textField.getText());
+//            textField.clear();
+//            textField.requestFocus();
     }
 
     public void tryToAuth(ActionEvent actionEvent) {
@@ -247,5 +272,14 @@ public class Controller implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void serverListClicked(MouseEvent mouseEvent) {
+    }
+
+    public void copyFileDir(ActionEvent actionEvent) {
+    }
+
+    public void createDir(ActionEvent actionEvent) {
     }
 }
