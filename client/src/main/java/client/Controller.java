@@ -65,6 +65,7 @@ public class Controller implements Initializable {
     private Stage stage;
     private Stage regStage;
     private RegController regController;
+    //some comment
 
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
