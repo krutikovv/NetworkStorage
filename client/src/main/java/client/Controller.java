@@ -65,6 +65,8 @@ public class Controller implements Initializable {
     private Stage stage;
     private Stage regStage;
     private RegController regController;
+    private StringBuilder dirClient = new StringBuilder("C:\\");
+    private StringBuilder dirServer = new StringBuilder("e:\\JAVA_projects\\NetworkStorage\\server\\localserver\\");
 
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
@@ -88,7 +90,7 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Platform.runLater(() -> {
-//            stage = (Stage) textArea.getScene().getWindow();
+            stage = (Stage) textArea.getScene().getWindow();
             stage.setOnCloseRequest(event -> {
                 System.out.println("bye");
                 if (socket != null && !socket.isClosed()) {
@@ -148,17 +150,17 @@ public class Controller implements Initializable {
                                 System.out.println("client disconnected");
                                 break;
                             }
-                            if (str.startsWith(Command.CLIENT_LIST)) {
-                                String[] tokens = str.split("\\s");
-                                Platform.runLater(() -> {
-                                    clientList.getItems().clear();
-                                    serverList.getItems().clear();
-                                    for (int i = 1; i < tokens.length; i++) {
-                                        clientList.getItems().add(tokens[i]);
-                                        serverList.getItems().add(tokens[i]);
-                                    }
-                                });
-                            }
+//                            if (str.startsWith(Command.CLIENT_LIST)) {
+//                                String[] tokens = str.split("\\s");
+//                                Platform.runLater(() -> {
+//                                    clientList.getItems().clear();
+//                                    serverList.getItems().clear();
+//                                    for (int i = 1; i < tokens.length; i++) {
+//                                        clientList.getItems().add(tokens[i]);
+//                                        serverList.getItems().add(tokens[i]);
+//                                    }
+//                                });
+//                            }
 
                         } else {
 //                            textArea.appendText(str + "\n");
@@ -185,20 +187,24 @@ public class Controller implements Initializable {
 
     @FXML
     public void sendMsg(ActionEvent actionEvent) {
-
+        clientList.getItems().clear();
+        serverList.getItems().clear();
         Path path = Paths.get("C:\\");
         File dir = new File(String.valueOf(path)); //path указывает на директорию
         List<File> lst = new ArrayList<>();
         for ( File file : dir.listFiles() ){
-            if ( file.isFile() || file.isDirectory()) {
+            if ( file.isDirectory()) {
                 lst.add(file);
-                clientList.getItems().add(file.toString());
+                clientList.getItems().add(file.getName());
             }
         }
-
+        for ( File file : dir.listFiles() ){
+            if ( file.isFile()) {
+                lst.add(file);
+                clientList.getItems().add(file.getName());
+            }
+        }
         System.out.println(lst);
-
-
 //            out.writeUTF(textField.getText());
 //            textField.clear();
 //            textField.requestFocus();
@@ -222,19 +228,38 @@ public class Controller implements Initializable {
     private void setTitle(String nickname) {
         if (nickname.equals("")) {
             Platform.runLater(() -> {
-                stage.setTitle("GeekChat");
+                stage.setTitle("NetworkStorage");
             });
         } else {
             Platform.runLater(() -> {
-                stage.setTitle(String.format("GeekChat [ %s ]", nickname));
+                stage.setTitle(String.format("NetworkStorage [ %s ]", nickname));
             });
         }
     }
 
     public void clientListClicked(MouseEvent mouseEvent) {
-        System.out.println(clientList.getSelectionModel().getSelectedItem());
-        String receiver = clientList.getSelectionModel().getSelectedItem();
-        textField.setText(String.format("%s %s ", Command.PRV_MSG, receiver));
+        String selectedItem = clientList.getSelectionModel().getSelectedItem();
+        dirClient.append(selectedItem + "\\");
+        //dirClient.delete(dirClient.indexOf(selectedItem), dirClient.length() - 1);
+        System.out.println(dirClient.toString());
+        clientList.getItems().clear();
+        textField.setText(dirClient.toString());
+        Path path = Paths.get(dirClient.toString());
+        File dir = new File(String.valueOf(path)); //path указывает на директорию
+        List<File> lst = new ArrayList<>();
+        for ( File file : dir.listFiles() ){
+            if (file.isDirectory()) {
+                lst.add(file);
+                clientList.getItems().add(file.getName());
+            }
+        }
+        for ( File file : dir.listFiles() ){
+            if ( file.isFile()) {
+                lst.add(file);
+                clientList.getItems().add(file.getName());
+            }
+        }
+        System.out.println(lst);
     }
 
     public void registration(ActionEvent actionEvent) {
@@ -255,7 +280,6 @@ public class Controller implements Initializable {
             regController.setController(this);
             regStage.initModality(Modality.APPLICATION_MODAL);
             regStage.initStyle(StageStyle.UTILITY);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -265,7 +289,6 @@ public class Controller implements Initializable {
         if (socket == null || socket.isClosed()) {
             connect();
         }
-
         String msg = String.format("%s %s %s %s", Command.REG, login, password, nickname);
         try {
             out.writeUTF(msg);
@@ -275,11 +298,33 @@ public class Controller implements Initializable {
     }
 
     public void serverListClicked(MouseEvent mouseEvent) {
+        Path path = Paths.get("e:\\JAVA_projects\\NetworkStorage\\server\\localserver\\");
+        System.out.println(path);
+        File dir = new File(String.valueOf(path)); //path указывает на директорию
+        List<File> lst = new ArrayList<>();
+        for ( File file : dir.listFiles() ){
+            if (file.isDirectory()) {
+                lst.add(file);
+                serverList.getItems().add(file.getName());
+            }
+        }
+        for ( File file : dir.listFiles() ){
+            if (file.isFile()) {
+                lst.add(file);
+                serverList.getItems().add(file.getName());
+            }
+        }
+        System.out.println(lst);
     }
 
     public void copyFileDir(ActionEvent actionEvent) {
     }
 
     public void createDir(ActionEvent actionEvent) {
+    }
+
+    public void backFileDir(ActionEvent actionEvent) {
+        System.out.println(dirClient.toString());
+        dirClient.delete(dirClient.indexOf(dirClient.toString()), dirClient.length() - 1);
     }
 }
