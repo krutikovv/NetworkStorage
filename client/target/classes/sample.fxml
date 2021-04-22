@@ -29,6 +29,7 @@
     </HBox>
 
     <HBox fx:id="controlPanel" visible="false">
+        <Button text="back" onAction="#backFileDir" minWidth="100"/>
         <Button text="copy" onAction="#copyFileDir" minWidth="100"/>
         <Button text="create" onAction="#createDir" minWidth="100"/>
     </HBox>
