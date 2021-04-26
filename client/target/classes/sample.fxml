@@ -32,11 +32,11 @@
         <Button text="back" onAction="#backFileDir" minWidth="100"/>
         <Button text="copy" onAction="#copyFileDir" minWidth="100"/>
         <Button text="create" onAction="#createDir" minWidth="100"/>
-    </HBox>
+     </HBox>
 
     <HBox fx:id="msgPanel" visible="false" managed="false">
         <TextField fx:id="textField" HBox.hgrow="ALWAYS" promptText="input message" onAction="#sendMsg"/>
-        <Button text="send" onAction="#sendMsg"/>
+        <Button text="close" onAction="#sendMsg"/>
     </HBox>
 
 </VBox>

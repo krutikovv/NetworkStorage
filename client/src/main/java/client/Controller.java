@@ -65,7 +65,7 @@ public class Controller implements Initializable {
     private Stage stage;
     private Stage regStage;
     private RegController regController;
-    private StringBuilder dirClient = new StringBuilder("C:\\");
+    private StringBuilder dirClient = new StringBuilder("C:");
     private StringBuilder dirServer = new StringBuilder("e:\\JAVA_projects\\NetworkStorage\\server\\localserver\\");
 
     public void setAuthenticated(boolean authenticated) {
@@ -84,24 +84,13 @@ public class Controller implements Initializable {
             nickname = "";
         }
         setTitle(nickname);
-//        textArea.clear();
+        refreshList(clientList, dirClient);
+        refreshList(serverList, dirServer);
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Platform.runLater(() -> {
-            stage = (Stage) textArea.getScene().getWindow();
-            stage.setOnCloseRequest(event -> {
-                System.out.println("bye");
-                if (socket != null && !socket.isClosed()) {
-                    try {
-                        out.writeUTF(Command.END);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        });
+        Platform.runLater(this::run);
         setAuthenticated(false);
     }
 
@@ -136,9 +125,8 @@ public class Controller implements Initializable {
                             if (str.equals(Command.REG_NO)) {
                                 regController.regNo();
                             }
-                        } else {
-//                            textArea.appendText(str + "\n");
-                        }
+                        }  //                            textArea.appendText(str + "\n");
+
                     }
 
                     //цикл работы
@@ -150,18 +138,6 @@ public class Controller implements Initializable {
                                 System.out.println("client disconnected");
                                 break;
                             }
-//                            if (str.startsWith(Command.CLIENT_LIST)) {
-//                                String[] tokens = str.split("\\s");
-//                                Platform.runLater(() -> {
-//                                    clientList.getItems().clear();
-//                                    serverList.getItems().clear();
-//                                    for (int i = 1; i < tokens.length; i++) {
-//                                        clientList.getItems().add(tokens[i]);
-//                                        serverList.getItems().add(tokens[i]);
-//                                    }
-//                                });
-//                            }
-
                         } else {
 //                            textArea.appendText(str + "\n");
                         }
@@ -187,27 +163,13 @@ public class Controller implements Initializable {
 
     @FXML
     public void sendMsg(ActionEvent actionEvent) {
-        clientList.getItems().clear();
-        serverList.getItems().clear();
-        Path path = Paths.get("C:\\");
-        File dir = new File(String.valueOf(path)); //path указывает на директорию
-        List<File> lst = new ArrayList<>();
-        for ( File file : dir.listFiles() ){
-            if ( file.isDirectory()) {
-                lst.add(file);
-                clientList.getItems().add(file.getName());
-            }
+        try {
+            out.writeUTF(Command.END);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        for ( File file : dir.listFiles() ){
-            if ( file.isFile()) {
-                lst.add(file);
-                clientList.getItems().add(file.getName());
-            }
-        }
-        System.out.println(lst);
-//            out.writeUTF(textField.getText());
-//            textField.clear();
-//            textField.requestFocus();
+        textField.clear();
+            textField.requestFocus();
     }
 
     public void tryToAuth(ActionEvent actionEvent) {
@@ -237,31 +199,6 @@ public class Controller implements Initializable {
         }
     }
 
-    public void clientListClicked(MouseEvent mouseEvent) {
-        String selectedItem = clientList.getSelectionModel().getSelectedItem();
-        dirClient.append(selectedItem + "\\");
-        //dirClient.delete(dirClient.indexOf(selectedItem), dirClient.length() - 1);
-        System.out.println(dirClient.toString());
-        clientList.getItems().clear();
-        textField.setText(dirClient.toString());
-        Path path = Paths.get(dirClient.toString());
-        File dir = new File(String.valueOf(path)); //path указывает на директорию
-        List<File> lst = new ArrayList<>();
-        for ( File file : dir.listFiles() ){
-            if (file.isDirectory()) {
-                lst.add(file);
-                clientList.getItems().add(file.getName());
-            }
-        }
-        for ( File file : dir.listFiles() ){
-            if ( file.isFile()) {
-                lst.add(file);
-                clientList.getItems().add(file.getName());
-            }
-        }
-        System.out.println(lst);
-    }
-
     public void registration(ActionEvent actionEvent) {
         if (regStage == null) {
             createRegWindow();
@@ -274,7 +211,7 @@ public class Controller implements Initializable {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/reg.fxml"));
             Parent root = fxmlLoader.load();
             regStage = new Stage();
-            regStage.setTitle("GeekChat registration");
+            regStage.setTitle("Registration");
             regStage.setScene(new Scene(root, 400, 350));
             regController = fxmlLoader.getController();
             regController.setController(this);
@@ -297,24 +234,36 @@ public class Controller implements Initializable {
         }
     }
 
-    public void serverListClicked(MouseEvent mouseEvent) {
-        Path path = Paths.get("e:\\JAVA_projects\\NetworkStorage\\server\\localserver\\");
-        System.out.println(path);
+    public void clientListClicked(MouseEvent mouseEvent) {
+        String selectedItem = clientList.getSelectionModel().getSelectedItem();
+        dirClient.append("\\" + selectedItem);
+        refreshList(clientList, dirClient);
+    }
+
+    private void refreshList(ListView list, StringBuilder dirList) {
+        list.getItems().clear();
+        textField.setText(dirList.toString());
+        Path path = Paths.get(dirList.toString());
         File dir = new File(String.valueOf(path)); //path указывает на директорию
         List<File> lst = new ArrayList<>();
-        for ( File file : dir.listFiles() ){
+        for (File file : dir.listFiles()) {
             if (file.isDirectory()) {
                 lst.add(file);
-                serverList.getItems().add(file.getName());
+                list.getItems().add(file.getName());
             }
         }
-        for ( File file : dir.listFiles() ){
+        for (File file : dir.listFiles()) {
             if (file.isFile()) {
                 lst.add(file);
-                serverList.getItems().add(file.getName());
+                list.getItems().add(file.getName());
             }
         }
-        System.out.println(lst);
+    }
+
+    public void serverListClicked(MouseEvent mouseEvent) {
+        String selectedItem = serverList.getSelectionModel().getSelectedItem();
+        dirServer.append("\\" + selectedItem);
+        refreshList(serverList, dirServer);
     }
 
     public void copyFileDir(ActionEvent actionEvent) {
@@ -324,7 +273,21 @@ public class Controller implements Initializable {
     }
 
     public void backFileDir(ActionEvent actionEvent) {
-        System.out.println(dirClient.toString());
-        dirClient.delete(dirClient.indexOf(dirClient.toString()), dirClient.length() - 1);
+        dirClient.delete(dirClient.lastIndexOf("\\"), dirClient.length());
+        refreshList(clientList, dirClient);
+    }
+
+    private void run() {
+        stage = (Stage) textField.getScene().getWindow();
+        stage.setOnCloseRequest(event -> {
+            System.out.println("bye");
+            if (socket != null && !socket.isClosed()) {
+                try {
+                    out.writeUTF(Command.END);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }
